@@ -1,6 +1,6 @@
 
-public class AnnuaireTrié extends EnsembleTriéP{
-	public AnnuaireTrié(){
+public class AnnuaireTriÃ© extends EnsembleTriÃ©P{
+	public AnnuaireTriÃ©(){
 		super();
 	}
 	

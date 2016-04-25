@@ -66,14 +66,14 @@ public class Personne {
 		Personne b = new Personne("Don","Cran");
 		Personne c = new Personne("Jules","Bernes");
 		Personne d = new Personne("Dan","Deu");
-		Personne e = new Personne("Jean-Michel","De Genève");
+		Personne e = new Personne("Jean-Michel","De Genï¿½ve");
 		Personne f = new Personne("Zeurel","Dessinateur");
 		Personne g = new Personne("un","passant");
 		System.out.println(a.estAvant(b)+"  Expected:False \n");
 		System.out.println(b.estAvant(c)+"  Expected:False \n");
 		System.out.println(toto.estAvant(a)+"  Expected:True \n");
-		EnsembleTriéP ensemble1 = new EnsembleTriéP();
-		EnsembleTriéP ensemble2 = new EnsembleTriéP();
+		EnsembleTriÃ©P ensemble1 = new EnsembleTriÃ©P();
+		EnsembleTriÃ©P ensemble2 = new EnsembleTriÃ©P();
 		a.setTel(2939);
 		b.setTel(1525);
 		c.setTel(5885);

@@ -1,10 +1,10 @@
 
-public class EnsembleTriéP {
+public class EnsembleTriÃ©P {
 	protected static final int CAPACITE = 100;
 	protected int card;
 	protected Personne[] Annu;
 	
-	public EnsembleTriéP(){
+	public EnsembleTriÃ©P(){
 		Annu = new Personne[CAPACITE];
 		card = 0;
 	}
@@ -166,8 +166,8 @@ public class EnsembleTriéP {
 	}
 	
 	
-	public EnsembleTriéP union(EnsembleTriéP p){
-		EnsembleTriéP ret = new EnsembleTriéP();
+	public EnsembleTriÃ©P union(EnsembleTriÃ©P p){
+		EnsembleTriÃ©P ret = new EnsembleTriÃ©P();
 		for(int i=0; i<card; i++){
 			ret.ajouter(Annu[i]);
 		}
@@ -179,8 +179,8 @@ public class EnsembleTriéP {
 		return ret;
 	}
 	
-	public EnsembleTriéP inter(EnsembleTriéP p){
-		EnsembleTriéP ret = new EnsembleTriéP();
+	public EnsembleTriÃ©P inter(EnsembleTriÃ©P p){
+		EnsembleTriÃ©P ret = new EnsembleTriÃ©P();
 		for(int i=0; i<card; i++){
 			if(p.contient(Annu[i])){
 				ret.ajouter(Annu[i]);
