@@ -4,9 +4,11 @@
 package library;
 
 import java.util.Collection;
-
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 
 
@@ -21,7 +23,7 @@ public class Library{
 	/**
 	 * The document collection
 	 */
-	private Map<Integer,Document> documents;
+	private HashMap<Integer,Document> documents;
 
 	/**
 	 * Constructor
@@ -60,6 +62,20 @@ public class Library{
 		}
 		return temp;
 	}
+
+        public String toString(Comparator<Document> c) {
+                String res = new String();
+
+                LinkedList<Document> sortedList = new LinkedList<Document>(documents.values());
+
+                Collections.sort(sortedList, c);
+
+                for (Document d : sortedList){
+                        res += d.toString() + "\n";
+                }
+
+                return res;
+        }
 
 	/**
 	 * Add a document to the library
@@ -107,15 +123,10 @@ public class Library{
 		documents.get(barCode).setAvailable(true);
 		}
 	}
-	
-	public Collection<Document> Value(){
-		return documents.values();
-	}
 
 	public Collection<Document> getDocumentByAuthor(String author) {
-		Collection<Document> all = Value();
 		Collection<Document> ret = new HashSet<>();
-		for (Document d : all){
+		for (Document d : documents.values()){
 			if (d.getTitle().contains(author)){
 				ret.add(d);
 			}

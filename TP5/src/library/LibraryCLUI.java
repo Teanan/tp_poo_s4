@@ -231,24 +231,8 @@ public class LibraryCLUI {
 	 * Print library content ordered by title
 	 */
 	
-	private String toString(Collection<Document> c){
-		String temp = new String();
-		
-		for (Document o : c){
-				temp+= o.toString()+"\n";
-			}
-		return temp;
-	}
-	
 	private void printContentByTitle() {
-		
-		
-		Comparator<Document> com = new TitleComparator();
-		Collection<Document> col = library.Value();
-		ArrayList<Document> doc = new ArrayList<Document>();
-		doc.addAll(col);
-		Collections.sort(doc,com);
-		System.out.println(toString(doc));
-		
+		Comparator<Document> c = new TitleComparator();
+                System.out.println(library.toString(c));		
 	}
 }
