@@ -45,23 +45,23 @@ public class Timetable {
 	}
 
 
-	private void addLesson(Lesson l) throws UnknownException{
+	private void addLesson(Lesson l) throws UnknownException, OccupiedRoomException {
 		if (!(nbScheduledLessons==MAX_LESSONS)){
-			
-			//TODO occupiedRoomException
-			
-			
-			
-			if (!(getCourse(l.getCourseId())== null)& !(getRoom(l.getRoomNumber())== null)){
-				scheduledLessons[nbScheduledLessons]= l;
-				nbScheduledLessons++;
+
+			// Check if course and room exist (throws UnknownException if not)
+			getCourse(l.getCourseId());
+			getRoom(l.getRoomNumber());
+
+			// Check if room is full
+			for (Lesson it : scheduledLessons){
+				if (it == null) continue;
+
+				if (it.getStartTime() == l.getStartTime() && it.getRoomNumber() == l.getRoomNumber())
+					throw new OccupiedRoomException("There is no room for you in this place ! (room " + l.getRoomNumber() + " at " + l.getStartTime());
 			}
-			else if ((getRoom(l.getRoomNumber())== null)){
-				throw new UnknownException("Room inconnue");
-			}
-			else if ((getCourse(l.getCourseId())== null)){
-				throw new UnknownException("Course inconnue");
-			}
+
+			scheduledLessons[nbScheduledLessons]= l;
+			nbScheduledLessons++;
 		}
 	}
 
@@ -72,22 +72,24 @@ public class Timetable {
 		}
 	}
 
-	private Course getCourse(int id) {
+	private Course getCourse(int id) throws UnknownCourseException {
 		for(int i=0; i<nbExistingCourses; i++){
 			if (existingCourses[i].getId()==id){
 				return existingCourses[i];
 			}
 		}
-		return null;
+
+		throw new UnknownCourseException("Course " + id + " not found");
 	}
 
-	private Room getRoom(int num) {
+	private Room getRoom(int num) throws UnknownRoomException {
 		for(int i=0; i<nbExistingRooms; i++){
 			if (existingRooms[i].getNumber()==num){
 				return existingRooms[i];
 			}
 		}
-		return null;
+
+		throw new UnknownRoomException("Room " + num + " not found");
 	}
 
 	/**
@@ -103,51 +105,86 @@ public class Timetable {
 	 */
 	public boolean parseFile(String path) {
 		BufferedReader br;
+
 		try{
-			br=new BufferedReader(new FileReader(path));
-			int erreur =0;
-			while (br.ready()){
-				try{
-				String s = br.readLine();
-				String[] seg = s.split(",");
-				if (seg[0].equals("Room")){
-					
-					Room R = new Room(Integer.parseInt(seg[1]), Integer.parseInt( seg[2]));
-					addRoom(R);
-				}else if (seg[0].equals("Lesson")){
-					
-					Lesson L = new Lesson(Integer.parseInt(seg[1]), Integer.parseInt( seg[2]),Integer.parseInt( seg[3]));
-					addLesson(L);
-				}else if (seg[0].equals("Course")){
-					
-					Course C = new Course(Integer.parseInt(seg[1]),  seg[2], seg[3]);
-					addCourse(C);
-				}
-				else {
-					br.close();
-					return false;
-				}
-				}
-				catch (UnknownException e) {
-					System.out.println(e.getMessage());
-					erreur++;
+			br = new BufferedReader(new FileReader(path));
+
+			int lineNum = 0;
+			
+			while(br.ready()){
+				String line = br.readLine();
+				String[] split = line.split(",");
+
+				lineNum++;
+				
+				if (split.length < 1) continue;
+
+				switch(split[0]){
+				case "Room":
+					if (split.length != 3) continue;
+					Room r = new Room(Integer.parseInt(split[1]), Integer.parseInt(split[2]));					
+					addRoom(r);
+					break;
+				case "Course":
+					if (split.length != 4) continue;
+					Course c = new Course(Integer.parseInt(split[1]), split[2], split[3]);
+					addCourse(c);
+					break;
+				case "Lesson":
+					if (split.length != 4) continue;
+
+					try{
+						Lesson l = new Lesson(Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+						addLesson(l);
+					}catch(UnknownRoomException | OccupiedRoomException e){
+						Lesson l = null;
+						
+						for (int i = 0; i < nbExistingRooms; i++){
+							if (!roomUsed(existingRooms[i], Integer.parseInt(split[1]))){
+								l = new Lesson(Integer.parseInt(split[1]), Integer.parseInt(split[2]), existingRooms[i].getNumber());
+								try{
+									addLesson(l);
+
+									System.out.println("Line #" + lineNum + " : Lesson " + l.getCourseId() + " at " + l.getStartTime() + "h was moved from room #" + Integer.parseInt(split[3]) + " to room #" + l.getRoomNumber());
+									break;
+								}catch(UnknownException | OccupiedRoomException ee){
+									System.out.println("Line #" + lineNum + " : Cannot add Lesson after moving it to room #" + existingRooms[i].getNumber() + " : " + ee.getMessage());
+								}
+							}
+						}
+						
+						if (l == null){
+							System.out.println("Line #" + lineNum + " : Not empty room found for Lesson " + Integer.parseInt(split[2]) + " at " + Integer.parseInt(split[1]) + "h");
+						}
+					}catch(UnknownException e){
+						System.out.println("Line #" + lineNum + " : Cannot add Lesson : " + e.getMessage());
+					}
+
+					break;
+				default:
+					System.out.println("WUT R U DOING ?!");
 				}
 			}
-			if(!(erreur==0)) System.out.println("Il y a eu "+ erreur +" problèmes!");
+
 			br.close();
+			
 			return true;
-		}catch (IOException e) {
+		}catch(IOException e){
 			System.out.println(e.getMessage());
-			
-			return false;
-		}
-		catch (NumberFormatException e) {
-			System.out.println(e.getMessage());
-			
-			return false;
 		}
 
+		return false;
+	}
+	
+	public boolean roomUsed(Room r, int time){
+		if (r == null)
+			return false;
 		
+		for (int i = 0; i < nbScheduledLessons; ++i)
+			if (scheduledLessons[i].getRoomNumber() == r.getNumber() && scheduledLessons[i].getStartTime() == time)
+				return true;
+		
+		return false;
 	}
 
 	public void print() {
